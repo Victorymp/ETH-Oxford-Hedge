@@ -90,7 +90,7 @@ export default function HedgeWidget() {
       amount: amt,
       timestamp: new Date(),
     };
-    setDecisions([newDecision, ...decisions]);
+    setDecisions((prevDecisions) => [newDecision, ...prevDecisions]);
 
     if (action === "yes" || action === "no") {
       setPortfolio((p) => ({
