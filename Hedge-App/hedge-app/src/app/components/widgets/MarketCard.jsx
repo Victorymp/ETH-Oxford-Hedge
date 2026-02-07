@@ -90,7 +90,7 @@ export default function MarketCard({ market, bounce, slugFound }) {
             padding: "16px 8px",
           }}
         >
-          No current markets found for hedge against your current position
+          No hedging opportunities right now watching the markets, and looking out for opportunities...
         </div>
       )}
     </div>
