@@ -1,11 +1,12 @@
+from azure.storage.blob import BlobServiceClient
 import os
+from .AssetStore import AssetStore
 
 class AzurePromptExtraction:
-  
-  @staticmethod
-  def get_prompt(filename:str):
-    base_dir = os.path.dirname(__file__)
-    prompt_path = os.path.join(base_dir, "Prompts", f"{filename}.txt")
+    @staticmethod
+    def get_prompt(filename: str) -> str:
+        return AssetStore.get_text(f"{filename}.txt")
 
-    with open(prompt_path, "r", encoding="utf-8") as file:
-        return file.read()
+    @staticmethod
+    def set_prompt(filename: str, content: str) -> None:
+        AssetStore.put_text(f"{filename}.txt", content)

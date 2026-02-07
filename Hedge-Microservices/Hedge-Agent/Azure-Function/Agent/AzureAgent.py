@@ -26,6 +26,8 @@ class AzureAgent:
       thread = self.project.agents.threads.create()
       print(f"Created thread, ID: {thread.id}")
       self.thread_id = thread.id
+      logging.info("Saving threadid")
+      AzurePromptExtraction.set_prompt("threadid",thread.id)
     
     def set_thread(self,thread_id:str):
        self.thread_id = thread_id
