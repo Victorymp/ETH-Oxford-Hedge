@@ -12,9 +12,6 @@ export default function MainScreen({
   showDecision,
   setShowDecision,
   handleDecision,
-  markets,
-  currentMarket,
-  setCurrentMarket,
 }) {
   return (
     <div style={{ padding: 16 }}>
@@ -92,9 +89,6 @@ export default function MainScreen({
       <DecisionButtons
         showDecision={showDecision}
         handleDecision={handleDecision}
-        markets={markets}
-        currentMarket={currentMarket}
-        setCurrentMarket={setCurrentMarket}
       />
     </div>
   );

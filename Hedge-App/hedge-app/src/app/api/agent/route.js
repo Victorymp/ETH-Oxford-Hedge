@@ -51,6 +51,23 @@ export async function POST(request) {
         typeof parsed.confidence === "number"
           ? Math.max(0, Math.min(1, parsed.confidence))
           : 0.5,
+      market:
+        parsed.market && typeof parsed.market === "object"
+          ? {
+              question:
+                typeof parsed.market.question === "string"
+                  ? parsed.market.question.slice(0, 200)
+                  : "Market loading...",
+              coin:
+                typeof parsed.market.coin === "string"
+                  ? parsed.market.coin
+                  : "ETH",
+              yesPrice:
+                typeof parsed.market.yesPrice === "number"
+                  ? Math.max(0, Math.min(1, parsed.market.yesPrice))
+                  : 0.5,
+            }
+          : null,
     };
 
     return Response.json(response);

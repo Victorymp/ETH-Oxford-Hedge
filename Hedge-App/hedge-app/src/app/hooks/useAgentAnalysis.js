@@ -6,6 +6,7 @@ export default function useAgentAnalysis() {
   const [agentMessage, setAgentMessage] = useState("");
   const [agentMood, setAgentMood] = useState("idle");
   const [confidence, setConfidence] = useState(0.5);
+  const [market, setMarket] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState(null);
 
@@ -34,6 +35,7 @@ export default function useAgentAnalysis() {
       setAgentMessage(data.message || "Signal unclear...");
       setAgentMood(moodMap[data.mood] || "idle");
       setConfidence(data.confidence || 0.5);
+      setMarket(data.market || null);
     } catch (err) {
       console.error("Agent analysis failed:", err);
       setError(err.message);
@@ -46,6 +48,7 @@ export default function useAgentAnalysis() {
       setAgentMessage(fallbacks[Math.floor(Math.random() * fallbacks.length)]);
       setAgentMood("idle");
       setConfidence(0.5);
+      setMarket(null);
     } finally {
       setIsAnalyzing(false);
     }
@@ -55,6 +58,7 @@ export default function useAgentAnalysis() {
     agentMessage,
     agentMood,
     confidence,
+    market,
     isAnalyzing,
     error,
     analyze,

@@ -21,15 +21,17 @@ export default function MarketCard({ market, bounce }) {
         <span style={{ fontSize: 8, color: COIN_COLORS[market.coin], letterSpacing: 1 }}>
           {market.coin}
         </span>
-        <span
-          style={{
-            fontSize: 7,
-            color: market.change > 0 ? "#98c379" : "#e06c75",
-            marginLeft: "auto",
-          }}
-        >
-          {market.change > 0 ? "▲" : "▼"} {Math.abs(market.change).toFixed(1)}%
-        </span>
+        {market.change != null && (
+          <span
+            style={{
+              fontSize: 7,
+              color: market.change > 0 ? "#98c379" : "#e06c75",
+              marginLeft: "auto",
+            }}
+          >
+            {market.change > 0 ? "▲" : "▼"} {Math.abs(market.change).toFixed(1)}%
+          </span>
+        )}
       </div>
 
       {/* Question */}

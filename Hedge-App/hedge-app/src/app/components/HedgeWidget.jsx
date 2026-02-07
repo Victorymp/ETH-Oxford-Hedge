@@ -9,17 +9,14 @@ import HistoryScreen from "./screens/HistoryScreen";
 import useFlarePrice from "../hooks/useFlarePrice";
 import useAgentAnalysis from "../hooks/useAgentAnalysis";
 
-// Simulated market data (prediction market questions)
-const MARKETS = [
-  { id: 1, coin: "ETH", question: "ETH will hit $4k by March?", yesPrice: 0.62, change: +5.2, sentiment: "bullish" },
-  { id: 2, coin: "BTC", question: "BTC dominance > 55% in Feb?", yesPrice: 0.78, change: -2.1, sentiment: "bearish" },
-  { id: 3, coin: "FLR", question: "FLR TVL doubles by Q2?", yesPrice: 0.34, change: +12.7, sentiment: "bullish" },
-  { id: 4, coin: "ETH", question: "ETH staking yield > 5%?", yesPrice: 0.45, change: +1.8, sentiment: "neutral" },
-  { id: 5, coin: "BTC", question: "BTC ETF inflows > $1B Feb?", yesPrice: 0.81, change: +0.4, sentiment: "bullish" },
-];
+// Fallback market shown while agent is loading
+const FALLBACK_MARKET = {
+  question: "Waiting for agent...",
+  coin: "ETH",
+  yesPrice: 0.5,
+};
 
 export default function HedgeWidget() {
-  const [currentMarket, setCurrentMarket] = useState(0);
   const [showDecision, setShowDecision] = useState(false);
   const [decisions, setDecisions] = useState([]);
   const [tickerOffset, setTickerOffset] = useState(0);
@@ -42,10 +39,11 @@ export default function HedgeWidget() {
     agentMessage,
     agentMood,
     confidence,
+    market: agentMarket,
     analyze,
   } = useAgentAnalysis();
 
-  const market = MARKETS[currentMarket];
+  const market = agentMarket || FALLBACK_MARKET;
 
   // Keep a ref to ethPrice so we can gate analysis without re-triggering
   const ethPriceRef = useRef(ethPrice);
@@ -62,14 +60,6 @@ export default function HedgeWidget() {
     const t = setInterval(() => setTickerOffset((o) => o - 1), 50);
     return () => clearInterval(t);
   }, []);
-
-  // Agent analysis on market change (gated on having price data)
-  useEffect(() => {
-    setShowDecision(false);
-    if (ethPriceRef.current !== null) {
-      analyze();
-    }
-  }, [currentMarket, analyze]);
 
   // Trigger first analysis once price data arrives
   const hasAnalyzedRef = useRef(false);
@@ -108,26 +98,28 @@ export default function HedgeWidget() {
       setBounce(false);
     }, 400);
 
+    // Ask agent for next market after decision
     setTimeout(() => {
-      setCurrentMarket((c) => (c + 1) % MARKETS.length);
+      setShowDecision(false);
+      analyze();
     }, 1200);
   };
 
-  // Build ticker text from live FTSO prices + market questions
+  // Build ticker text from live FTSO prices + current agent market
   const tickerText = (() => {
     const priceParts = Object.entries(allPrices).map(
       ([symbol, price]) =>
         `${symbol} $${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
     );
 
-    const marketParts = MARKETS.map(
-      (m) => `${m.coin} "${m.question}" YES:${(m.yesPrice * 100).toFixed(0)}¢`
-    );
+    const marketPart = agentMarket
+      ? `${agentMarket.coin} "${agentMarket.question}" YES:${(agentMarket.yesPrice * 100).toFixed(0)}¢`
+      : null;
 
-    if (priceParts.length > 0) {
-      return [...priceParts, ...marketParts].join("  ◆  ");
-    }
-    return marketParts.join("  ◆  ");
+    const parts = [...priceParts];
+    if (marketPart) parts.push(marketPart);
+
+    return parts.length > 0 ? parts.join("  ◆  ") : "Loading FTSO feeds...";
   })();
 
   const formatTime = (d) =>
@@ -228,9 +220,6 @@ export default function HedgeWidget() {
             showDecision={showDecision}
             setShowDecision={setShowDecision}
             handleDecision={handleDecision}
-            markets={MARKETS}
-            currentMarket={currentMarket}
-            setCurrentMarket={setCurrentMarket}
           />
         )}
 

@@ -9,15 +9,11 @@ Analyze the provided. Provide a clear, actionable trading recommendation.
 ---------- FTSO Data -----------
   {%FTSO_data%}
 ---------- END -----------------
----------- Polymarket Data ------------
-  {%polymarket_data%}
----------- END ---------------------
-
 
 Your goal is to provide us your insight so we need to know your mood, the message and confidence on a polymarket position according to the information that you have. You believe markets always present opportunities - the key is identifying the right entry/exit points
 
 **Analysis Guidelines**
-There are 4 key objects we need from you
+There are 5 key objects we need from you
 
 mood: bullish, bearish, neutral
 1. Pick from 3 words bullish
@@ -32,11 +28,15 @@ confidence:
 1. This will be a float that we will convert into a percentage later
 2. Range from between 0.1 - 0.99
 
+slug_found:
+1. boolean of whether we found a successful slug
+
 market:
 a. market has 3 objects that we need to get from polymarket
 1. use the market that will be hedged against the eth price according to the message
 2. the coin that it relates to
 3. yesPrice is a float that people are predicting yes
+4. string of successful slug
 
 **output format**
 You must output you response in json format
@@ -46,9 +46,11 @@ For example:
   "message": "ETH steady at 2093, hedge with...",
   "mood": "bullish",
   "confidence": 0.72,
+  "slug_found": true,
   "market": {
     "question": "Will ETH hit $4,000 by March 2025?",
     "coin": "ETH",
-    "yesPrice": 0.62
+    "yesPrice": 0.62,
+    "successful_slug": will-eth-hit-$4,000-by-March-2025
   }
 }
