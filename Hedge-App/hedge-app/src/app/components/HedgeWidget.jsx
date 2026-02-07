@@ -1,13 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Navigation from "./widgets/Navigation";
 import Ticker from "./widgets/Ticker";
 import MainScreen from "./screens/MainScreen";
 import PortfolioScreen from "./screens/PortfolioScreen";
 import HistoryScreen from "./screens/HistoryScreen";
+import useFlarePrice from "../hooks/useFlarePrice";
+import useAgentAnalysis from "../hooks/useAgentAnalysis";
 
-// Simulated market data
+// Simulated market data (prediction market questions)
 const MARKETS = [
   { id: 1, coin: "ETH", question: "ETH will hit $4k by March?", yesPrice: 0.62, change: +5.2, sentiment: "bullish" },
   { id: 2, coin: "BTC", question: "BTC dominance > 55% in Feb?", yesPrice: 0.78, change: -2.1, sentiment: "bearish" },
@@ -16,31 +18,8 @@ const MARKETS = [
   { id: 5, coin: "BTC", question: "BTC ETF inflows > $1B Feb?", yesPrice: 0.81, change: +0.4, sentiment: "bullish" },
 ];
 
-const AGENT_MESSAGES = {
-  bullish: [
-    "Oi! This one's looking spicy 🔥",
-    "The charts don't lie... mostly 📈",
-    "I'd bet my last pixel on this!",
-    "FTSO data confirms the vibe ✨",
-  ],
-  bearish: [
-    "Hmm, tread carefully here...",
-    "My pixel senses are tingling ⚠️",
-    "The data says nah on this one",
-    "Maybe skip this round, friend",
-  ],
-  neutral: [
-    "Could go either way tbh 🤷",
-    "The oracle is... uncertain",
-    "Flip a coin? Just kidding, let's analyze",
-    "Needs more data, checking FTSO...",
-  ],
-};
-
 export default function HedgeWidget() {
   const [currentMarket, setCurrentMarket] = useState(0);
-  const [agentMood, setAgentMood] = useState("idle");
-  const [agentMessage, setAgentMessage] = useState("");
   const [showDecision, setShowDecision] = useState(false);
   const [decisions, setDecisions] = useState([]);
   const [tickerOffset, setTickerOffset] = useState(0);
@@ -50,7 +29,27 @@ export default function HedgeWidget() {
   const [bounce, setBounce] = useState(false);
   const [flashColor, setFlashColor] = useState(null);
 
+  // FTSO price feed from HedgePriceFeed contract
+  const {
+    allPrices,
+    ethPrice,
+    loading: priceLoading,
+    error: priceError,
+  } = useFlarePrice();
+
+  // AI agent analysis via Azure Function
+  const {
+    agentMessage,
+    agentMood,
+    confidence,
+    analyze,
+  } = useAgentAnalysis();
+
   const market = MARKETS[currentMarket];
+
+  // Keep a ref to ethPrice so we can gate analysis without re-triggering
+  const ethPriceRef = useRef(ethPrice);
+  ethPriceRef.current = ethPrice;
 
   // Clock
   useEffect(() => {
@@ -64,19 +63,22 @@ export default function HedgeWidget() {
     return () => clearInterval(t);
   }, []);
 
-  // Agent analysis on market change
+  // Agent analysis on market change (gated on having price data)
   useEffect(() => {
-    setAgentMood("thinking");
     setShowDecision(false);
-    setAgentMessage("");
-    const msgs = AGENT_MESSAGES[market.sentiment];
-    const msg = msgs[Math.floor(Math.random() * msgs.length)];
-    const timer = setTimeout(() => {
-      setAgentMood(market.sentiment === "bullish" ? "happy" : "idle");
-      setAgentMessage(msg);
-    }, 800);
-    return () => clearTimeout(timer);
-  }, [currentMarket]);
+    if (ethPriceRef.current !== null) {
+      analyze();
+    }
+  }, [currentMarket, analyze]);
+
+  // Trigger first analysis once price data arrives
+  const hasAnalyzedRef = useRef(false);
+  useEffect(() => {
+    if (ethPrice !== null && !hasAnalyzedRef.current) {
+      hasAnalyzedRef.current = true;
+      analyze();
+    }
+  }, [ethPrice, analyze]);
 
   const handleDecision = (action) => {
     const amt = 50;
@@ -111,10 +113,22 @@ export default function HedgeWidget() {
     }, 1200);
   };
 
-  const tickerText = MARKETS.map(
-    (m) =>
-      `${m.coin} "${m.question}" YES:${(m.yesPrice * 100).toFixed(0)}¢ ${m.change > 0 ? "▲" : "▼"}${Math.abs(m.change).toFixed(1)}%`
-  ).join("  ◆  ");
+  // Build ticker text from live FTSO prices + market questions
+  const tickerText = (() => {
+    const priceParts = Object.entries(allPrices).map(
+      ([symbol, price]) =>
+        `${symbol} $${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+    );
+
+    const marketParts = MARKETS.map(
+      (m) => `${m.coin} "${m.question}" YES:${(m.yesPrice * 100).toFixed(0)}¢`
+    );
+
+    if (priceParts.length > 0) {
+      return [...priceParts, ...marketParts].join("  ◆  ");
+    }
+    return marketParts.join("  ◆  ");
+  })();
 
   const formatTime = (d) =>
     d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
@@ -210,6 +224,7 @@ export default function HedgeWidget() {
             bounce={bounce}
             agentMood={agentMood}
             agentMessage={agentMessage}
+            confidence={confidence}
             showDecision={showDecision}
             setShowDecision={setShowDecision}
             handleDecision={handleDecision}
@@ -238,21 +253,25 @@ export default function HedgeWidget() {
             background: "#0d1117",
           }}
         >
-          <span style={{ fontSize: 6, color: "#484f58" }}>FTSO v2 · 1.8s</span>
+          <span style={{ fontSize: 6, color: "#484f58" }}>
+            FTSO v2 · {priceLoading ? "connecting..." : priceError ? "ERROR" : `$${ethPrice?.toFixed(0)}`}
+          </span>
           <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
             <div
               style={{
                 width: 6,
                 height: 6,
                 borderRadius: "50%",
-                background: "#98c379",
-                animation: "pulse-glow 2s ease infinite",
-                boxShadow: "0 0 4px #98c379",
+                background: priceError ? "#e06c75" : priceLoading ? "#e5c07b" : "#98c379",
+                animation: !priceError && !priceLoading ? "pulse-glow 2s ease infinite" : "none",
+                boxShadow: priceError ? "0 0 4px #e06c75" : priceLoading ? "0 0 4px #e5c07b" : "0 0 4px #98c379",
               }}
             />
-            <span style={{ fontSize: 6, color: "#484f58" }}>LIVE</span>
+            <span style={{ fontSize: 6, color: "#484f58" }}>
+              {priceError ? "ERR" : priceLoading ? "..." : "LIVE"}
+            </span>
           </div>
-          <span style={{ fontSize: 6, color: "#484f58" }}>XRPL TRUSTLINE</span>
+          <span style={{ fontSize: 6, color: "#484f58" }}>COSTON2</span>
         </div>
       </div>
     </div>

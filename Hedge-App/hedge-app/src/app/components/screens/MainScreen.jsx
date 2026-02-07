@@ -8,6 +8,7 @@ export default function MainScreen({
   bounce,
   agentMood,
   agentMessage,
+  confidence,
   showDecision,
   setShowDecision,
   handleDecision,
@@ -66,12 +67,12 @@ export default function MainScreen({
               <div style={{ flex: 1, height: 4, background: "#21262d", borderRadius: 2 }}>
                 <div
                   style={{
-                    width: `${market.yesPrice * 100}%`,
+                    width: `${confidence * 100}%`,
                     height: "100%",
                     background:
-                      market.sentiment === "bullish"
+                      confidence >= 0.6
                         ? "#98c379"
-                        : market.sentiment === "bearish"
+                        : confidence <= 0.4
                         ? "#e06c75"
                         : "#e5c07b",
                     borderRadius: 2,
@@ -80,7 +81,7 @@ export default function MainScreen({
                 />
               </div>
               <span style={{ fontSize: 6, color: "#8b949e" }}>
-                {(market.yesPrice * 100).toFixed(0)}%
+                {(confidence * 100).toFixed(0)}%
               </span>
             </div>
           )}
