@@ -7,6 +7,7 @@ export default function useAgentAnalysis() {
   const [agentMood, setAgentMood] = useState("idle");
   const [confidence, setConfidence] = useState(0.5);
   const [market, setMarket] = useState(null);
+  const [slugFound, setSlugFound] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState(null);
 
@@ -36,6 +37,7 @@ export default function useAgentAnalysis() {
       setAgentMood(moodMap[data.mood] || "idle");
       setConfidence(data.confidence || 0.5);
       setMarket(data.market || null);
+      setSlugFound(data.slug_found === true);
     } catch (err) {
       console.error("Agent analysis failed:", err);
       setError(err.message);
@@ -49,6 +51,7 @@ export default function useAgentAnalysis() {
       setAgentMood("idle");
       setConfidence(0.5);
       setMarket(null);
+      setSlugFound(false);
     } finally {
       setIsAnalyzing(false);
     }
@@ -59,6 +62,7 @@ export default function useAgentAnalysis() {
     agentMood,
     confidence,
     market,
+    slugFound,
     isAnalyzing,
     error,
     analyze,

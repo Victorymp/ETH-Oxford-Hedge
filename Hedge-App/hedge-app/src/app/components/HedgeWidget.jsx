@@ -40,6 +40,7 @@ export default function HedgeWidget() {
     agentMood,
     confidence,
     market: agentMarket,
+    slugFound,
     analyze,
   } = useAgentAnalysis();
 
@@ -217,6 +218,7 @@ export default function HedgeWidget() {
             agentMood={agentMood}
             agentMessage={agentMessage}
             confidence={confidence}
+            slugFound={slugFound}
             showDecision={showDecision}
             setShowDecision={setShowDecision}
             handleDecision={handleDecision}

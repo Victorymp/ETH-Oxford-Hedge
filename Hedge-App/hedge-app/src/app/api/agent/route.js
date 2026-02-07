@@ -51,6 +51,7 @@ export async function POST(request) {
         typeof parsed.confidence === "number"
           ? Math.max(0, Math.min(1, parsed.confidence))
           : 0.5,
+      slug_found: parsed.slug_found === true,
       market:
         parsed.market && typeof parsed.market === "object"
           ? {

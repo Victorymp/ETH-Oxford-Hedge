@@ -9,6 +9,7 @@ export default function MainScreen({
   agentMood,
   agentMessage,
   confidence,
+  slugFound,
   showDecision,
   setShowDecision,
   handleDecision,
@@ -16,7 +17,7 @@ export default function MainScreen({
   return (
     <div style={{ padding: 16 }}>
       {/* Market Card */}
-      <MarketCard market={market} bounce={bounce} />
+      <MarketCard market={market} bounce={bounce} slugFound={slugFound} />
 
       {/* Agent Section */}
       <div
