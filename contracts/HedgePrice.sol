@@ -13,7 +13,7 @@ contract HedgePriceFeed {
     
     struct FeedInfo {
         bytes21 id;
-        string symbo
+        string symbol;
     }
     
     // Core feeds
