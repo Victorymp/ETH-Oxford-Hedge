@@ -9,9 +9,15 @@ class function_helpers:
   
 
   def get_prompt(self):
+    logging.info("")
     result = AzurePromptExtraction.get_prompt("prompt")
     logging.info(f"Built the prompt")
     return result
+  
+  def build_prompt(self,prompt:str,ftsodata:str,polymarket_data:str):
+    prompt = prompt.replace(f"%FTSO_data%",ftsodata)
+    prompt = prompt.replace(f"%polymarket_data%",polymarket_data)
+    return prompt
   
   
   def query_agent(self) -> str | None:
