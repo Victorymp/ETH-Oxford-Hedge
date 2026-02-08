@@ -162,7 +162,7 @@ The Azure-hosted AI agent:
 
 ## AI resources
 
-Notebooklm on the papers that inspired the:
+Notebooklm on the papers that inspired the project:
 https://notebooklm.google.com/notebook/e87bd389-f596-461f-9c2f-5561d4ee834a?artifactId=8a1868b7-eed3-4af6-ab05-870b55d541b5
 
 ## Team
