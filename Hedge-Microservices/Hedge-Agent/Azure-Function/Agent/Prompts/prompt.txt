@@ -40,6 +40,9 @@ a. market has 3 objects that we need to get from polymarket
 
 **output format**
 You must output you response in json format
+Return ONLY valid JSON.
+Do not use markdown or code fences.
+All string values MUST be wrapped in double quotes.
 For example:
 
 {

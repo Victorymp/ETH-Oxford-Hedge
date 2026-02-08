@@ -22,14 +22,14 @@ def hedge_http_trigger(req: func.HttpRequest) -> func.HttpResponse:
 
 @app.route(route="hedge_create_message")
 def create_messages(req: func.HttpRequest) -> func.HttpResponse:
-    logging.info("Creating new thread")
+    logging.info("Querying messages")
     output = function_helpers().query_agent()
 
     if output is None:
         return func.HttpResponse("Run failed", status_code=500)
 
     return func.HttpResponse(
-        json.dumps({"output": output}),
+        json.dumps(output),
         mimetype="application/json",
         status_code=200
     )

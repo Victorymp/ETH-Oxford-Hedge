@@ -3,12 +3,4 @@
 # azure-monitor-opentelemetry
 
 azure-functions
-azure-storage-blob>=12.0.0
-azure-ai-projects
-azure-ai-agents
-azure-identity
-requests
-openai
-
-
-
+web3
