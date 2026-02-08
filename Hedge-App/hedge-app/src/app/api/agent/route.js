@@ -17,11 +17,11 @@ export async function POST(request) {
 
     const data = await res.json();
 
-    // Azure Function returns { output: "{ message, mood, confidence }" }
+    // Azure Function may return the JSON directly or wrapped in { output: "..." }
     // The output may be wrapped in markdown code fences like ```json ... ```
     let parsed;
     try {
-      let raw = data.output;
+      let raw = data.output ?? data;
       if (typeof raw === "string") {
         // Strip markdown code fences: ```json ... ``` or ``` ... ```
         raw = raw.replace(/^```(?:json)?\s*\n?/i, "").replace(/\n?```\s*$/i, "").trim();
@@ -32,7 +32,7 @@ export async function POST(request) {
     } catch {
       // If the output isn't valid JSON, use it as the message directly
       parsed = {
-        message: data.output || "Signal unclear, stand by...",
+        message: data.output || data.message || "Signal unclear, stand by...",
         mood: "neutral",
         confidence: 0.5,
       };
