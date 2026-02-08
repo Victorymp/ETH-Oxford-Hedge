@@ -5,6 +5,7 @@ import logging
 import os
 import requests
 import json
+import random
 
 from typing import Any, Dict, List, Optional
 
@@ -135,10 +136,12 @@ class function_helpers:
 
     # 2️⃣ Ask GPT-5 for candidate Polymarket slugs
     pairs = self.list_open_ethereum_market_slugs_and_titles()
-    logging.info(pairs[:5])
+    random.shuffle(pairs)
+    sample = pairs[:5]
+    logging.info(sample)
     slug_prompt = f"""
       Give the best slug based on this list of slugs that will yield the best result:
-      {pairs[:5]}
+      {sample}
 
       Based on this output:
       {agent_output_raw}
@@ -150,6 +153,7 @@ class function_helpers:
 
       If no good hedge exists, return [].
       """.strip()
+    logging.info(f"Slug prompt: {pairs[:5]}")
 
     market_list = AzureOpenai.query_gpt_5(slug_prompt)
 
