@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/pixel-mascot.svg" alt="Hedge Pixel Mascot" width="180" />
+</p>
+
 # Hedge
 
 **ETH Oxford 2026 Hackathon**
@@ -158,6 +162,14 @@ The Azure-hosted AI agent:
     "yesPrice": 0.62
   }
 }
+```
+
+## Presentation
+
+The project presentation is available as a page in the Next.js app:
+
+```
+http://localhost:3000/presentation
 ```
 
 ## AI resources
