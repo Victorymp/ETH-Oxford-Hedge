@@ -33,7 +33,6 @@ class FTSOConnector:
     def list_prices(self) -> list:
       return [ {"id":i, "value":self.get_feed_price(i) } for i in range(3) ]
     
-    
     def polymark_request(self,slug:str):
       logging.info(f"Checking market with slug of: {slug}")
       response = requests.get(f"https://gamma-api.polymarket.com/markets/slug/{slug}")
@@ -42,8 +41,6 @@ class FTSOConnector:
         return None
       return response.json()
        
-       
-    
     def test_markets(self, markets:list) -> dict:
       successful_slug:str =  "no-slug-found"
       boolean_slug:bool =  False

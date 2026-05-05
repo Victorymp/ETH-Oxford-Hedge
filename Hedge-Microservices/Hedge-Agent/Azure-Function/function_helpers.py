@@ -50,6 +50,7 @@ class function_helpers:
         raise ValueError(f"Tag slug '{tag_slug}' did not return an 'id'. Response: {data}")
     return int(data["id"])
   
+  ## * All parameters must be passed as keywords
   def list_open_ethereum_market_slugs_and_titles(self,
     *,
     tag_slug: str = "ethereum",
@@ -106,7 +107,7 @@ class function_helpers:
   def query_agent(self) -> list[dict]:
     logging.info("Querying agent")
 
-    # 1️⃣ Run agent
+    # Run agent
     prompt = self.build_prompt(self.get_prompt())
     agent = AzureAgent("DEFAULT")
     agent.create_message(prompt)
@@ -134,7 +135,7 @@ class function_helpers:
         "question": market.get("question"),
     }
 
-    # 2️⃣ Ask GPT-5 for candidate Polymarket slugs
+    # Ask GPT-5 for candidate Polymarket slugs
     pairs = self.list_open_ethereum_market_slugs_and_titles()
     random.shuffle(pairs)
     sample = pairs[:5]
